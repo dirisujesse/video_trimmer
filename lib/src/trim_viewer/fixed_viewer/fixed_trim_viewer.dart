@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -409,11 +410,11 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   @override
   void dispose() {
     videoPlayerController.pause();
-    widget.onChangePlaybackState!(false);
+    widget.onChangePlaybackState?.call(false);
     if (_videoFile != null) {
       videoPlayerController.setVolume(0.0);
       videoPlayerController.dispose();
-      widget.onChangePlaybackState!(false);
+      widget.onChangePlaybackState?.call(false);
     }
     super.dispose();
   }

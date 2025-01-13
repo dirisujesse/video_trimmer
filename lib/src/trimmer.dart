@@ -30,6 +30,8 @@ class Trimmer {
 
   VideoPlayerController? get videoPlayerController => _videoPlayerController;
 
+  bool get isLoaded => _videoPlayerController?.value.isInitialized ?? false;
+
   File? currentVideoFile;
 
   /// Listen to this stream to catch the events
@@ -38,14 +40,16 @@ class Trimmer {
   /// Loads a video using the path provided.
   ///
   /// Returns the loaded video file.
-  Future<void> loadVideo({required File videoFile}) async {
+  Future<bool> loadVideo({required File videoFile}) async {
     currentVideoFile = videoFile;
     if (videoFile.existsSync()) {
       _videoPlayerController = VideoPlayerController.file(currentVideoFile!);
-      await _videoPlayerController!.initialize().then((_) {
+      await _videoPlayerController?.initialize().then((_) {
         _controller.add(TrimmerEvent.initialized);
       });
+      return isLoaded;
     }
+    return false;
   }
 
   Future<String> _createFolderInAppDocDir(
@@ -74,7 +78,7 @@ class Trimmer {
 
     // Directory + folder name
     final Directory directoryFolder =
-        Directory('${directory!.path}/$folderName/');
+        Directory('${directory?.path}/$folderName/');
 
     if (await directoryFolder.exists()) {
       // If folder already exists return path
@@ -282,8 +286,9 @@ class Trimmer {
     required double startValue,
     required double endValue,
   }) async {
+    if (videoPlayerController == null) return false;
     if (videoPlayerController!.value.isPlaying) {
-      await videoPlayerController!.pause();
+      await videoPlayerController?.pause();
       return false;
     } else {
       if (videoPlayerController!.value.position.inMilliseconds >=
@@ -303,4 +308,20 @@ class Trimmer {
   void dispose() {
     _controller.close();
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! Trimmer) return false;
+
+    return _videoPlayerController?.value ==
+            other.videoPlayerController?.value &&
+        currentVideoFile?.path == other.currentVideoFile?.path &&
+        isLoaded == other.isLoaded;
+  }
+
+  @override
+  int get hashCode =>
+      super.hashCode ^
+      currentVideoFile.hashCode ^
+      videoPlayerController.hashCode;
 }

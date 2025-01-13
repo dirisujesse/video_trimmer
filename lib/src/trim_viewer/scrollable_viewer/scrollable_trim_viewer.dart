@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -365,7 +366,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         _videoEndPos =
             preciseAreaDuration.inMilliseconds.toDouble() * trimmerFraction;
         log('Video End Pos: $_videoEndPos ms');
-        widget.onChangeEnd!(_videoEndPos);
+        widget.onChangeEnd?.call(_videoEndPos);
         log('Video Selected Duration: ${_videoEndPos - _videoStartPos}');
 
         // Defining the tween points
@@ -382,7 +383,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
           })
           ..addStatusListener((status) {
             if (status == AnimationStatus.completed) {
-              _animationController!.stop();
+              _animationController?.stop();
             }
           });
       });
@@ -395,19 +396,19 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
       final bool isPlaying = videoPlayerController.value.isPlaying;
 
       if (isPlaying) {
-        widget.onChangePlaybackState!(true);
+        widget.onChangePlaybackState?.call(true);
         setState(() {
           _currentPosition =
               videoPlayerController.value.position.inMilliseconds;
 
           if (_currentPosition > _videoEndPos.toInt()) {
             videoPlayerController.pause();
-            widget.onChangePlaybackState!(false);
-            _animationController!.stop();
+            widget.onChangePlaybackState?.call(false);
+            _animationController?.stop();
           } else {
-            if (!_animationController!.isAnimating) {
-              widget.onChangePlaybackState!(true);
-              _animationController!.forward();
+            if (!(_animationController?.isAnimating ?? true)) {
+              widget.onChangePlaybackState?.call(true);
+              _animationController?.forward();
             }
           }
         });
@@ -416,10 +417,10 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
           if (_animationController != null) {
             if ((_scrubberAnimation?.value ?? 0).toInt() ==
                 (_endPos.dx).toInt()) {
-              _animationController!.reset();
+              _animationController?.reset();
             }
-            _animationController!.stop();
-            widget.onChangePlaybackState!(false);
+            _animationController?.stop();
+            widget.onChangePlaybackState?.call(false);
           }
         }
       }
@@ -536,9 +537,9 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
             _remainingDuration;
     widget.onChangeEnd!(_videoEndPos);
     _linearTween.end = _endPos.dx;
-    _animationController!.duration =
+    _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
-    _animationController!.reset();
+    _animationController?.reset();
   }
 
   /// Drag gesture ended, update UI accordingly.
@@ -565,11 +566,11 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
     _scrollController.dispose();
     _scrollStartTimer?.cancel();
     _scrollingTimer?.cancel();
-    widget.onChangePlaybackState!(false);
+    widget.onChangePlaybackState?.call(false);
     if (_videoFile != null) {
       videoPlayerController.setVolume(0.0);
       videoPlayerController.dispose();
-      widget.onChangePlaybackState!(false);
+      widget.onChangePlaybackState?.call(false);
     }
     super.dispose();
   }
