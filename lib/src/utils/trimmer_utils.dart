@@ -88,7 +88,7 @@ Stream<List<Uint8List?>> generateThumbnail({
   log('---------------------------------');
 
   try {
-    if (thumbnails?.isNotEmpty ?? false) {
+    if ((thumbnails?.length ?? 0) == numberOfThumbnails) {
       yield thumbnails ?? [];
       return;
     }

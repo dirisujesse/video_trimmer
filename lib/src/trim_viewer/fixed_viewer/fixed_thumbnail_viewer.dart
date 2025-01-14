@@ -53,16 +53,16 @@ class FixedThumbnailViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stream = generateThumbnail(
-      videoPath: videoFile.path,
-      videoDuration: videoDuration,
-      numberOfThumbnails: numberOfThumbnails,
-      quality: quality,
-      onThumbnailLoadingComplete: onThumbnailLoadingComplete,
-    ).asBroadcastStream();
     return StreamBuilder<List<Uint8List?>>(
       initialData: thumbnails,
-      stream: stream,
+      stream: generateThumbnail(
+        videoPath: videoFile.path,
+        videoDuration: videoDuration,
+        numberOfThumbnails: numberOfThumbnails,
+        quality: quality,
+        thumbnails: thumbnails,
+        onThumbnailLoadingComplete: onThumbnailLoadingComplete,
+      ),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<Uint8List?> imageBytes = snapshot.data!;
