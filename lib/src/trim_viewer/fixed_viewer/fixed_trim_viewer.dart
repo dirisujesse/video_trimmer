@@ -8,6 +8,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_trimmer/src/trim_viewer/trim_editor_painter.dart';
 import 'package:video_trimmer/src/trimmer.dart';
 import 'package:video_trimmer/src/utils/duration_style.dart';
+import 'package:video_trimmer/src/utils/trimmer_utils.dart';
 
 import '../../utils/editor_drag_type.dart';
 import '../trim_area_properties.dart';
@@ -52,12 +53,12 @@ class FixedTrimViewer extends StatefulWidget {
   /// Callback to the video start position
   ///
   /// Returns the selected video start position in `milliseconds`.
-  final Function(double startValue)? onChangeStart;
+  final Function(TrimDetails details)? onChangeStart;
 
   /// Callback to the video end position.
   ///
   /// Returns the selected video end position in `milliseconds`.
-  final Function(double endValue)? onChangeEnd;
+  final Function(TrimDetails details)? onChangeEnd;
 
   /// Callback to the video playback
   /// state to know whether it is currently playing or paused.
@@ -75,6 +76,9 @@ class FixedTrimViewer extends StatefulWidget {
   final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
 
   final List<Uint8List?>? thumbnails;
+
+  final TrimDetails? trimStart;
+  final TrimDetails? trimEnd;
 
   /// Widget for displaying the video trimmer.
   ///
@@ -125,6 +129,8 @@ class FixedTrimViewer extends StatefulWidget {
     required this.trimmer,
     required this.onThumbnailLoadingComplete,
     this.thumbnails,
+    this.trimEnd,
+    this.trimStart,
     this.autoDisposeController = true,
     this.viewerWidth = 50.0 * 8,
     this.viewerHeight = 50,
@@ -242,16 +248,24 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           maxLengthPixels = _thumbnailViewerW;
         }
 
-        _videoEndPos = fraction != null
-            ? _videoDuration.toDouble() * (fraction ?? 0)
-            : _videoDuration.toDouble();
+        _videoStartPos = widget.trimStart?.position ?? 0;
+        _videoEndPos = widget.trimEnd?.position ??
+            (fraction != null
+                ? _videoDuration.toDouble() * (fraction ?? 0)
+                : _videoDuration.toDouble());
 
-        widget.onChangeEnd?.call(_videoEndPos);
-
-        _endPos = Offset(
-          maxLengthPixels != null ? (maxLengthPixels ?? 0) : _thumbnailViewerW,
-          _thumbnailViewerH,
+        widget.onChangeEnd?.call(
+          TrimDetails(position: _videoEndPos, offset: _endPos),
         );
+
+        _startPos = widget.trimStart?.offset ?? _startPos;
+        _endPos = widget.trimEnd?.offset ??
+            Offset(
+              maxLengthPixels != null
+                  ? (maxLengthPixels ?? 0)
+                  : _thumbnailViewerW,
+              _thumbnailViewerH,
+            );
 
         // Defining the tween points
         _linearTween = Tween(begin: _startPos.dx, end: _endPos.dx);
@@ -394,7 +408,9 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void _onStartDragged() {
     _startFraction = _startPos.dx / _thumbnailViewerW;
     _videoStartPos = _videoDuration * _startFraction;
-    widget.onChangeStart?.call(_videoStartPos);
+    widget.onChangeStart?.call(
+      TrimDetails(position: _videoStartPos, offset: _startPos),
+    );
     _linearTween.begin = _startPos.dx;
     _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -404,7 +420,9 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void _onEndDragged() {
     _endFraction = _endPos.dx / _thumbnailViewerW;
     _videoEndPos = _videoDuration * _endFraction;
-    widget.onChangeEnd?.call(_videoEndPos);
+    widget.onChangeEnd?.call(
+      TrimDetails(position: _videoEndPos, offset: _endPos),
+    );
     _linearTween.end = _endPos.dx;
     _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());

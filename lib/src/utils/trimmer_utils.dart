@@ -6,6 +6,28 @@ import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
+class TrimDetails {
+  final double position;
+  final Offset offset;
+
+  const TrimDetails({required this.position, required this.offset});
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! TrimDetails) return false;
+
+    return position == other.position && offset == other.offset;
+  }
+
+  @override
+  String toString() {
+    return "POSITION -> $position; Offset -> Offset(X -> ${offset.dx}, Y -> ${offset.dy})";
+  }
+
+  @override
+  int get hashCode => position.hashCode ^ offset.hashCode;
+}
+
 /// Formats a [Duration] object to a human-readable string.
 ///
 /// Example:

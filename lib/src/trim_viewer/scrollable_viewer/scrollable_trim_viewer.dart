@@ -12,6 +12,7 @@ import 'package:video_trimmer/src/trim_viewer/trim_area_properties.dart';
 import 'package:video_trimmer/src/trim_viewer/trim_editor_properties.dart';
 import 'package:video_trimmer/src/trimmer.dart';
 import 'package:video_trimmer/src/utils/duration_style.dart';
+import 'package:video_trimmer/src/utils/trimmer_utils.dart';
 
 import '../../utils/editor_drag_type.dart';
 import 'scrollable_thumbnail_viewer.dart';
@@ -55,12 +56,12 @@ class ScrollableTrimViewer extends StatefulWidget {
   /// Callback to the video start position
   ///
   /// Returns the selected video start position in `milliseconds`.
-  final Function(double startValue)? onChangeStart;
+  final Function(TrimDetails details)? onChangeStart;
 
   /// Callback to the video end position.
   ///
   /// Returns the selected video end position in `milliseconds`.
-  final Function(double endValue)? onChangeEnd;
+  final Function(TrimDetails details)? onChangeEnd;
 
   /// Callback to the video playback
   /// state to know whether it is currently playing or paused.
@@ -82,6 +83,9 @@ class ScrollableTrimViewer extends StatefulWidget {
   final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
 
   final List<Uint8List?>? thumbnails;
+
+  final TrimDetails? trimStart;
+  final TrimDetails? trimEnd;
 
   /// Widget for displaying the video trimmer.
   ///
@@ -132,6 +136,8 @@ class ScrollableTrimViewer extends StatefulWidget {
     required this.maxVideoLength,
     required this.onThumbnailLoadingComplete,
     this.thumbnails,
+    this.trimEnd,
+    this.trimStart,
     this.autoDisposeController = true,
     this.viewerWidth = 50 * 8,
     this.viewerHeight = 50,
@@ -292,6 +298,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
   @override
   void initState() {
     super.initState();
+
     _scrollController = ScrollController();
     _startCircleSize = widget.editorProperties.circleSize;
     _endCircleSize = widget.editorProperties.circleSize;
@@ -370,13 +377,19 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         log('trimmerFraction: $trimmerFraction');
         final trimmerCover = trimmerFraction * trimAreaLength;
         maxLengthPixels = trimmerCover;
-        _endPos = Offset(trimmerCover, thumbnailHeight);
+        _startPos = widget.trimStart?.offset ?? _startPos;
+        _endPos =
+            widget.trimEnd?.offset ?? Offset(trimmerCover, thumbnailHeight);
         log('START: $_startPos, END: $_endPos');
 
-        _videoEndPos =
+        _videoStartPos = widget.trimStart?.position ?? 0;
+        _videoEndPos = widget.trimEnd?.position ??
             preciseAreaDuration.inMilliseconds.toDouble() * trimmerFraction;
+
         log('Video End Pos: $_videoEndPos ms');
-        widget.onChangeEnd?.call(_videoEndPos);
+        widget.onChangeEnd?.call(
+          TrimDetails(position: _videoEndPos, offset: _endPos),
+        );
         log('Video Selected Duration: ${_videoEndPos - _videoStartPos}');
 
         // Defining the tween points
@@ -533,7 +546,9 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeStart?.call(_videoStartPos);
+    widget.onChangeStart?.call(
+      TrimDetails(position: _videoStartPos, offset: _startPos),
+    );
     _linearTween.begin = _startPos.dx;
     _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
@@ -547,7 +562,9 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeEnd?.call(_videoEndPos);
+    widget.onChangeEnd?.call(
+      TrimDetails(position: _videoEndPos, offset: _endPos),
+    );
     _linearTween.end = _endPos.dx;
     _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());

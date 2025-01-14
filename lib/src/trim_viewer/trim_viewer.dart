@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:video_trimmer/src/utils/trimmer_utils.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
 import 'fixed_viewer/fixed_trim_viewer.dart';
@@ -69,12 +70,15 @@ class TrimViewer extends StatefulWidget {
   /// Callback to the video start position
   ///
   /// Returns the selected video start position in `milliseconds`.
-  final Function(double startValue)? onChangeStart;
+  final Function(TrimDetails details)? onChangeStart;
 
   /// Callback to the video end position.
   ///
   /// Returns the selected video end position in `milliseconds`.
-  final Function(double endValue)? onChangeEnd;
+  final Function(TrimDetails details)? onChangeEnd;
+
+  final TrimDetails? trimStart;
+  final TrimDetails? trimEnd;
 
   /// Callback to the video playback
   /// state to know whether it is currently playing or paused.
@@ -181,6 +185,8 @@ class TrimViewer extends StatefulWidget {
     required this.trimmer,
     this.maxVideoLength = const Duration(milliseconds: 0),
     this.type = ViewerType.auto,
+    this.trimStart,
+    this.trimEnd,
     this.autoDisposeController = true,
     this.viewerWidth = 50 * 8,
     this.viewerHeight = 50,

@@ -101,8 +101,8 @@ class _TrimmerViewState extends State<TrimmerView> {
                       areaProperties: TrimAreaProperties.edgeBlur(
                         thumbnailQuality: 10,
                       ),
-                      onChangeStart: (value) => _startValue = value,
-                      onChangeEnd: (value) => _endValue = value,
+                      onChangeStart: (value) => _startValue = value.position,
+                      onChangeEnd: (value) => _endValue = value.position,
                       onChangePlaybackState: (value) =>
                           setState(() => _isPlaying = value),
                     ),
