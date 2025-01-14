@@ -22,10 +22,12 @@ class FixedThumbnailViewer extends StatelessWidget {
   final int numberOfThumbnails;
 
   /// Callback function that is called when thumbnail loading is complete.
-  final VoidCallback onThumbnailLoadingComplete;
+  final ValueChanged<List<Uint8List?>> onThumbnailLoadingComplete;
 
   /// The quality of the generated thumbnails, ranging from 0 to 100.
   final int quality;
+
+  final List<Uint8List?>? thumbnails;
 
   /// For showing the thumbnails generated from the video,
   /// like a frame by frame preview
@@ -46,17 +48,21 @@ class FixedThumbnailViewer extends StatelessWidget {
     required this.fit,
     required this.onThumbnailLoadingComplete,
     this.quality = 75,
+    this.thumbnails,
   });
 
   @override
   Widget build(BuildContext context) {
+    final stream = generateThumbnail(
+      videoPath: videoFile.path,
+      videoDuration: videoDuration,
+      numberOfThumbnails: numberOfThumbnails,
+      quality: quality,
+      onThumbnailLoadingComplete: onThumbnailLoadingComplete,
+    ).asBroadcastStream();
     return StreamBuilder<List<Uint8List?>>(
-      stream: generateThumbnail(
-          videoPath: videoFile.path,
-          videoDuration: videoDuration,
-          numberOfThumbnails: numberOfThumbnails,
-          quality: quality,
-          onThumbnailLoadingComplete: onThumbnailLoadingComplete),
+      initialData: thumbnails,
+      stream: stream,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           List<Uint8List?> imageBytes = snapshot.data!;

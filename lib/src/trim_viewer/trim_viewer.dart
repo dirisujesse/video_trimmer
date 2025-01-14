@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
@@ -93,7 +95,9 @@ class TrimViewer extends StatefulWidget {
 
   /// Callback for thumbnail loader to know when all the
   /// thumbnails are loaded.
-  final VoidCallback? onThumbnailLoadingComplete;
+  final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
+
+  final List<Uint8List?>? thumbnails;
 
   /// Widget for displaying the video trimmer.
   ///
@@ -190,6 +194,7 @@ class TrimViewer extends StatefulWidget {
     this.editorProperties = const TrimEditorProperties(),
     this.areaProperties = const TrimAreaProperties(),
     this.onThumbnailLoadingComplete,
+    this.thumbnails,
   });
 
   @override
@@ -239,11 +244,8 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       paddingFraction: widget.paddingFraction,
       editorProperties: widget.editorProperties,
       areaProperties: widget.areaProperties,
-      onThumbnailLoadingComplete: () {
-        if (widget.onThumbnailLoadingComplete != null) {
-          widget.onThumbnailLoadingComplete!();
-        }
-      },
+      onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
+      thumbnails: widget.thumbnails,
     );
 
     final fixedTrimViewer = FixedTrimViewer(
@@ -265,11 +267,8 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
         thumbnailQuality: widget.areaProperties.thumbnailQuality,
         borderRadius: widget.areaProperties.borderRadius,
       ),
-      onThumbnailLoadingComplete: () {
-        if (widget.onThumbnailLoadingComplete != null) {
-          widget.onThumbnailLoadingComplete!();
-        }
-      },
+      onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
+      thumbnails: widget.thumbnails,
     );
 
     return _isScrollableAllowed == null

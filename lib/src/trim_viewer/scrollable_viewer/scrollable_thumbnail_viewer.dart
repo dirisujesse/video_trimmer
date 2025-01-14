@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class ScrollableThumbnailViewer extends StatelessWidget {
     required this.fit,
     required this.scrollController,
     required this.onThumbnailLoadingComplete,
+    this.thumbnails,
     this.quality = 75,
   });
 
@@ -49,11 +51,13 @@ class ScrollableThumbnailViewer extends StatelessWidget {
   final ScrollController scrollController;
 
   /// Callback function that is called when thumbnail loading is complete.
-  final VoidCallback onThumbnailLoadingComplete;
+  final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
 
   /// The quality of the generated thumbnails, ranging from 0 to 100.
   /// Defaults to 75.
   final int quality;
+
+  final List<Uint8List?>? thumbnails;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +73,11 @@ class ScrollableThumbnailViewer extends StatelessWidget {
               videoPath: videoFile.path,
               videoDuration: videoDuration,
               numberOfThumbnails: numberOfThumbnails,
+              thumbnails: thumbnails,
               quality: quality,
-              onThumbnailLoadingComplete: onThumbnailLoadingComplete,
+              onThumbnailLoadingComplete: (thumbnails) {
+                onThumbnailLoadingComplete?.call(thumbnails);
+              },
             ),
             builder: (context, snapshot) {
               if (snapshot.hasData) {

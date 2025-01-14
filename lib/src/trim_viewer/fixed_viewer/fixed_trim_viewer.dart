@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -71,7 +73,9 @@ class FixedTrimViewer extends StatefulWidget {
   /// Properties for customizing the fixed trim area.
   final FixedTrimAreaProperties areaProperties;
 
-  final VoidCallback onThumbnailLoadingComplete;
+  final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
+
+  final List<Uint8List?>? thumbnails;
 
   /// Widget for displaying the video trimmer.
   ///
@@ -121,6 +125,7 @@ class FixedTrimViewer extends StatefulWidget {
     super.key,
     required this.trimmer,
     required this.onThumbnailLoadingComplete,
+    this.thumbnails,
     this.autoDisposeController = true,
     this.viewerWidth = 50.0 * 8,
     this.viewerHeight = 50,
@@ -217,7 +222,10 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           thumbnailHeight: _thumbnailViewerH,
           numberOfThumbnails: _numberOfThumbnails,
           quality: widget.areaProperties.thumbnailQuality,
-          onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
+          thumbnails: widget.thumbnails,
+          onThumbnailLoadingComplete: (thumbnails) {
+            (thumbnails);
+          },
         );
         this.thumbnailWidget = thumbnailWidget;
         Duration totalDuration = videoPlayerController.value.duration;

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 
 /// Formats a [Duration] object to a human-readable string.
@@ -70,10 +71,11 @@ int _mapQualityToFFmpegScale(int quality) {
 /// An error if the thumbnails could not be generated.
 Stream<List<Uint8List?>> generateThumbnail({
   required String videoPath,
+  List<Uint8List?>? thumbnails,
   required int videoDuration,
   required int numberOfThumbnails,
   required int quality,
-  required VoidCallback onThumbnailLoadingComplete,
+  required ValueChanged<List<Uint8List?>> onThumbnailLoadingComplete,
 }) async* {
   final double eachPart = videoDuration / numberOfThumbnails;
 
@@ -87,6 +89,11 @@ Stream<List<Uint8List?>> generateThumbnail({
   log('---------------------------------');
 
   try {
+    if ((thumbnails?.length ?? 0) == numberOfThumbnails) {
+      yield thumbnails ?? [];
+      return;
+    }
+
     // Get the temporary directory
     final tmpDir = await getTemporaryDirectory();
 
@@ -135,7 +142,7 @@ Stream<List<Uint8List?>> generateThumbnail({
       thumbnailBytes.add(bytes);
 
       if (thumbnailBytes.length == numberOfThumbnails) {
-        onThumbnailLoadingComplete();
+        onThumbnailLoadingComplete(thumbnailBytes);
       }
 
       yield thumbnailBytes;

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -78,7 +79,9 @@ class ScrollableTrimViewer extends StatefulWidget {
   /// Properties for customizing the trim area.
   final TrimAreaProperties areaProperties;
 
-  final VoidCallback onThumbnailLoadingComplete;
+  final ValueChanged<List<Uint8List?>>? onThumbnailLoadingComplete;
+
+  final List<Uint8List?>? thumbnails;
 
   /// Widget for displaying the video trimmer.
   ///
@@ -128,6 +131,7 @@ class ScrollableTrimViewer extends StatefulWidget {
     required this.trimmer,
     required this.maxVideoLength,
     required this.onThumbnailLoadingComplete,
+    this.thumbnails,
     this.autoDisposeController = true,
     this.viewerWidth = 50 * 8,
     this.viewerHeight = 50,
@@ -348,6 +352,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
           numberOfThumbnails: _numberOfThumbnails,
           quality: widget.areaProperties.thumbnailQuality,
           onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
+          thumbnails: widget.thumbnails,
         );
         this.thumbnailWidget = thumbnailWidget;
         log('=========================');
