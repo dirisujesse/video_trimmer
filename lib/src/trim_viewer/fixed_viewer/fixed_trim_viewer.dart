@@ -223,7 +223,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           quality: widget.areaProperties.thumbnailQuality,
           thumbnails: widget.thumbnails,
           onThumbnailLoadingComplete: (thumbnails) {
-            (thumbnails);
+            widget.onThumbnailLoadingComplete?.call(thumbnails);
           },
         );
         this.thumbnailWidget = thumbnailWidget;
