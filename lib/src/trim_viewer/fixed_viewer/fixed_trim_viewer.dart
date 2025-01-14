@@ -361,6 +361,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           !(_endPos.dx - _startPos.dx - details.delta.dx >
               (maxLengthPixels ?? 0))) {
         _startPos += details.delta;
+        log("$_startPos");
         _onStartDragged();
       }
     } else if (_dragType == EditorDragType.center) {
@@ -387,8 +388,11 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   }
 
   void _onStartDragged() {
-    _startFraction = (_startPos.dx / _thumbnailViewerW);
+    log("$_startPos");
+    _startFraction = _startPos.dx / _thumbnailViewerW;
+    log("$_startFraction");
     _videoStartPos = _videoDuration * _startFraction;
+    log("$_videoStartPos");
     widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
     _animationController?.duration =
