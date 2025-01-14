@@ -274,7 +274,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   }
 
   Future<void> _initializeVideoController() async {
-    if (_videoFile != null) {
+    if (_videoFile != null && mounted) {
       videoPlayerController.addListener(() {
         final bool isPlaying = videoPlayerController.value.isPlaying;
 
@@ -388,11 +388,8 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   }
 
   void _onStartDragged() {
-    log("$_startPos");
     _startFraction = _startPos.dx / _thumbnailViewerW;
-    log("$_startFraction");
     _videoStartPos = _videoDuration * _startFraction;
-    log("$_videoStartPos");
     widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
     _animationController?.duration =

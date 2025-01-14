@@ -76,6 +76,11 @@ Stream<List<Uint8List?>> generateThumbnail({
   required int quality,
   required ValueChanged<List<Uint8List?>> onThumbnailLoadingComplete,
 }) async* {
+  if (thumbnails?.isNotEmpty ?? false) {
+    yield thumbnails ?? [];
+    return;
+  }
+
   final double eachPart = videoDuration / numberOfThumbnails;
 
   final List<Uint8List?> thumbnailBytes = [];
@@ -88,11 +93,6 @@ Stream<List<Uint8List?>> generateThumbnail({
   log('---------------------------------');
 
   try {
-    if ((thumbnails?.length ?? 0) == numberOfThumbnails) {
-      yield thumbnails ?? [];
-      return;
-    }
-
     // Get the temporary directory
     final tmpDir = await getTemporaryDirectory();
 
