@@ -48,7 +48,6 @@ class TrimViewer extends StatefulWidget {
   /// By default it is set to `true`.
   final bool showDuration;
 
-
   /// Determines `VideoPlayerController` disposal strategy
   ///
   /// By default it is set to `true`.
@@ -226,6 +225,7 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final scrollableViewer = ScrollableTrimViewer(
       trimmer: widget.trimmer,
+      key: ValueKey((widget.trimmer.hashCode, "scrollable-trimmer")),
       maxVideoLength: widget.maxVideoLength,
       viewerWidth: widget.viewerWidth,
       viewerHeight: widget.viewerHeight,
@@ -248,6 +248,7 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
 
     final fixedTrimViewer = FixedTrimViewer(
       trimmer: widget.trimmer,
+      key: ValueKey((widget.trimmer.hashCode, "fixed-trimmer")),
       maxVideoLength: widget.maxVideoLength,
       viewerWidth: widget.viewerWidth,
       autoDisposeController: widget.autoDisposeController,
