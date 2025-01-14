@@ -263,6 +263,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
 
         _scrubberAnimation = _linearTween.animate(_animationController!)
           ..addListener(() {
+            if (!mounted) return;
             setState(() {});
           })
           ..addStatusListener((status) {
@@ -276,42 +277,44 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
 
   Future<void> _initializeVideoController() async {
     if (_videoFile != null) {
-      videoPlayerController.addListener(() {
-        final bool isPlaying = videoPlayerController.value.isPlaying;
-
-        if (isPlaying) {
-          widget.onChangePlaybackState?.call(true);
-          setState(() {
-            _currentPosition =
-                videoPlayerController.value.position.inMilliseconds;
-
-            if (_currentPosition > _videoEndPos.toInt()) {
-              videoPlayerController.pause();
-              widget.onChangePlaybackState?.call(false);
-              _animationController?.stop();
-            } else {
-              if (!(_animationController?.isAnimating ?? true)) {
-                widget.onChangePlaybackState?.call(true);
-                _animationController?.forward();
-              }
-            }
-          });
-        } else {
-          if (videoPlayerController.value.isInitialized) {
-            if (_animationController != null) {
-              if ((_scrubberAnimation?.value ?? 0).toInt() ==
-                  (_endPos.dx).toInt()) {
-                _animationController?.reset();
-              }
-              _animationController?.stop();
-              widget.onChangePlaybackState?.call(false);
-            }
-          }
-        }
-      });
+      videoPlayerController.addListener(_ctrlListener);
 
       videoPlayerController.setVolume(1.0);
       _videoDuration = videoPlayerController.value.duration.inMilliseconds;
+    }
+  }
+
+  _ctrlListener() {
+    if (!mounted) return;
+    final bool isPlaying = videoPlayerController.value.isPlaying;
+
+    if (isPlaying) {
+      widget.onChangePlaybackState?.call(true);
+      setState(() {
+        _currentPosition = videoPlayerController.value.position.inMilliseconds;
+
+        if (_currentPosition > _videoEndPos.toInt()) {
+          videoPlayerController.pause();
+          widget.onChangePlaybackState?.call(false);
+          _animationController?.stop();
+        } else {
+          if (!(_animationController?.isAnimating ?? true)) {
+            widget.onChangePlaybackState?.call(true);
+            _animationController?.forward();
+          }
+        }
+      });
+    } else {
+      if (videoPlayerController.value.isInitialized) {
+        if (_animationController != null) {
+          if ((_scrubberAnimation?.value ?? 0).toInt() ==
+              (_endPos.dx).toInt()) {
+            _animationController?.reset();
+          }
+          _animationController?.stop();
+          widget.onChangePlaybackState?.call(false);
+        }
+      }
     }
   }
 
@@ -428,6 +431,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
     log("Fixed Trimmer Disposed");
     videoPlayerController.pause();
     widget.onChangePlaybackState?.call(false);
+    videoPlayerController.removeListener(_ctrlListener);
     if (_videoFile == null) {
       super.dispose();
       return;
