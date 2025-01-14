@@ -8,7 +8,7 @@ import 'package:path_provider/path_provider.dart';
 
 class TrimDetails {
   final double position;
-  final Offset offset;
+  final Offset? offset;
 
   const TrimDetails({required this.position, required this.offset});
 
@@ -21,7 +21,7 @@ class TrimDetails {
 
   @override
   String toString() {
-    return "POSITION -> $position; Offset -> Offset(X -> ${offset.dx}, Y -> ${offset.dy})";
+    return "POSITION -> $position; Offset -> Offset(X -> ${offset?.dx ?? 0}, Y -> ${offset?.dy ?? 0})";
   }
 
   @override
