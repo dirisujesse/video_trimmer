@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:video_trimmer/src/utils/trimmer_utils.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
 import 'fixed_viewer/fixed_trim_viewer.dart';
@@ -252,6 +251,8 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       areaProperties: widget.areaProperties,
       onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
       thumbnails: widget.thumbnails,
+      trimEnd: widget.trimEnd,
+      trimStart: widget.trimStart,
     );
 
     final fixedTrimViewer = FixedTrimViewer(
@@ -275,6 +276,8 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       ),
       onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
       thumbnails: widget.thumbnails,
+      trimEnd: widget.trimEnd,
+      trimStart: widget.trimStart,
     );
 
     return _isScrollableAllowed == null
