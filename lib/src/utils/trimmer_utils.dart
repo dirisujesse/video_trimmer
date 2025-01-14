@@ -140,7 +140,7 @@ Stream<List<Uint8List?>> generateThumbnail({
 
       thumbnailBytes.add(bytes);
 
-      if (thumbnailBytes.length == numberOfThumbnails) {
+      if (i == numberOfThumbnails) {
         onThumbnailLoadingComplete(thumbnailBytes);
       }
 
