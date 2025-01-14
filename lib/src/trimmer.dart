@@ -41,15 +41,18 @@ class Trimmer {
   ///
   /// Returns the loaded video file.
   Future<bool> loadVideo({required File videoFile}) async {
-    currentVideoFile = videoFile;
-    if (videoFile.existsSync()) {
-      _videoPlayerController = VideoPlayerController.file(currentVideoFile!);
-      await _videoPlayerController?.initialize().then((_) {
+    try {
+      currentVideoFile = videoFile;
+      if (videoFile.existsSync()) {
+        _videoPlayerController = VideoPlayerController.file(currentVideoFile!);
+        await _videoPlayerController?.initialize();
         _controller.add(TrimmerEvent.initialized);
-      });
-      return isLoaded;
+        return isLoaded;
+      }
+      return false;
+    } catch (_) {
+      return false;
     }
-    return false;
   }
 
   Future<String> _createFolderInAppDocDir(
