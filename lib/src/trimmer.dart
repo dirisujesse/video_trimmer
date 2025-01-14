@@ -321,7 +321,7 @@ class Trimmer {
 
   @override
   int get hashCode =>
-      super.hashCode ^
+      isLoaded.hashCode ^
       currentVideoFile.hashCode ^
       videoPlayerController.hashCode;
 }
