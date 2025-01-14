@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -222,20 +223,20 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
             fraction = widget.maxVideoLength.inMilliseconds /
                 totalDuration.inMilliseconds;
 
-            maxLengthPixels = _thumbnailViewerW * fraction!;
+            maxLengthPixels = _thumbnailViewerW * (fraction ?? 0);
           }
         } else {
           maxLengthPixels = _thumbnailViewerW;
         }
 
         _videoEndPos = fraction != null
-            ? _videoDuration.toDouble() * fraction!
+            ? _videoDuration.toDouble() * (fraction ?? 0)
             : _videoDuration.toDouble();
 
-        widget.onChangeEnd!(_videoEndPos);
+        widget.onChangeEnd?.call(_videoEndPos);
 
         _endPos = Offset(
-          maxLengthPixels != null ? maxLengthPixels! : _thumbnailViewerW,
+          maxLengthPixels != null ? (maxLengthPixels ?? 0) : _thumbnailViewerW,
           _thumbnailViewerH,
         );
 
@@ -253,7 +254,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
           })
           ..addStatusListener((status) {
             if (status == AnimationStatus.completed) {
-              _animationController!.stop();
+              _animationController?.stop();
             }
           });
       });
@@ -266,19 +267,19 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
         final bool isPlaying = videoPlayerController.value.isPlaying;
 
         if (isPlaying) {
-          widget.onChangePlaybackState!(true);
+          widget.onChangePlaybackState?.call(true);
           setState(() {
             _currentPosition =
                 videoPlayerController.value.position.inMilliseconds;
 
             if (_currentPosition > _videoEndPos.toInt()) {
               videoPlayerController.pause();
-              widget.onChangePlaybackState!(false);
-              _animationController!.stop();
+              widget.onChangePlaybackState?.call(false);
+              _animationController?.stop();
             } else {
-              if (!_animationController!.isAnimating) {
-                widget.onChangePlaybackState!(true);
-                _animationController!.forward();
+              if (!(_animationController?.isAnimating ?? true)) {
+                widget.onChangePlaybackState?.call(true);
+                _animationController?.forward();
               }
             }
           });
@@ -287,10 +288,10 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
             if (_animationController != null) {
               if ((_scrubberAnimation?.value ?? 0).toInt() ==
                   (_endPos.dx).toInt()) {
-                _animationController!.reset();
+                _animationController?.reset();
               }
-              _animationController!.stop();
-              widget.onChangePlaybackState!(false);
+              _animationController?.stop();
+              widget.onChangePlaybackState?.call(false);
             }
           }
         }
@@ -345,7 +346,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
       _startCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_startPos.dx + details.delta.dx >= 0) &&
           (_startPos.dx + details.delta.dx <= _endPos.dx) &&
-          !(_endPos.dx - _startPos.dx - details.delta.dx > maxLengthPixels!)) {
+          !(_endPos.dx - _startPos.dx - details.delta.dx > (maxLengthPixels ?? 0))) {
         _startPos += details.delta;
         _onStartDragged();
       }
@@ -363,7 +364,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
       _endCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_endPos.dx + details.delta.dx <= _thumbnailViewerW) &&
           (_endPos.dx + details.delta.dx >= _startPos.dx) &&
-          !(_endPos.dx - _startPos.dx + details.delta.dx > maxLengthPixels!)) {
+          !(_endPos.dx - _startPos.dx + details.delta.dx > (maxLengthPixels ?? 0))) {
         _endPos += details.delta;
         _onEndDragged();
       }
@@ -374,21 +375,21 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void _onStartDragged() {
     _startFraction = (_startPos.dx / _thumbnailViewerW);
     _videoStartPos = _videoDuration * _startFraction;
-    widget.onChangeStart!(_videoStartPos);
+    widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
-    _animationController!.duration =
+    _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
-    _animationController!.reset();
+    _animationController?.reset();
   }
 
   void _onEndDragged() {
     _endFraction = _endPos.dx / _thumbnailViewerW;
     _videoEndPos = _videoDuration * _endFraction;
-    widget.onChangeEnd!(_videoEndPos);
+    widget.onChangeEnd?.call(_videoEndPos);
     _linearTween.end = _endPos.dx;
-    _animationController!.duration =
+    _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
-    _animationController!.reset();
+    _animationController?.reset();
   }
 
   /// Drag gesture ended, update UI accordingly.

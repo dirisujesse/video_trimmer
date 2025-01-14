@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -476,7 +477,8 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
       _startCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_startPos.dx + details.delta.dx >= 0) &&
           (_startPos.dx + details.delta.dx <= _endPos.dx) &&
-          !(_endPos.dx - _startPos.dx - details.delta.dx > maxLengthPixels!)) {
+          !(_endPos.dx - _startPos.dx - details.delta.dx >
+              (maxLengthPixels ?? 0))) {
         _startPos += details.delta;
         _onStartDragged();
       }
@@ -494,7 +496,8 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
       _endCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_endPos.dx + details.delta.dx <= _thumbnailViewerW) &&
           (_endPos.dx + details.delta.dx >= _startPos.dx) &&
-          !(_endPos.dx - _startPos.dx + details.delta.dx > maxLengthPixels!)) {
+          !(_endPos.dx - _startPos.dx + details.delta.dx >
+              (maxLengthPixels ?? 0))) {
         _endPos += details.delta;
         _onEndDragged();
       }
@@ -520,11 +523,11 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeStart!(_videoStartPos);
+    widget.onChangeStart?.call(_videoStartPos);
     _linearTween.begin = _startPos.dx;
-    _animationController!.duration =
+    _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
-    _animationController!.reset();
+    _animationController?.reset();
   }
 
   void _onEndDragged() {
@@ -534,7 +537,7 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
         (_scrollController.position.pixels /
                 _scrollController.position.maxScrollExtent) *
             _remainingDuration;
-    widget.onChangeEnd!(_videoEndPos);
+    widget.onChangeEnd?.call(_videoEndPos);
     _linearTween.end = _endPos.dx;
     _animationController?.duration =
         Duration(milliseconds: (_videoEndPos - _videoStartPos).toInt());
