@@ -35,6 +35,11 @@ class ScrollableTrimViewer extends StatefulWidget {
   /// By default it is set to `true`.
   final bool showDuration;
 
+  /// Determines `VideoPlayerController` disposal strategy
+  ///
+  /// By default it is set to `true`.
+  final bool autoDisposeController;
+
   /// For providing a `TextStyle` to the
   /// duration text.
   ///
@@ -123,6 +128,7 @@ class ScrollableTrimViewer extends StatefulWidget {
     required this.trimmer,
     required this.maxVideoLength,
     required this.onThumbnailLoadingComplete,
+    this.autoDisposeController = true,
     this.viewerWidth = 50 * 8,
     this.viewerHeight = 50,
     this.showDuration = true,
@@ -568,11 +574,12 @@ class _ScrollableTrimViewerState extends State<ScrollableTrimViewer>
     _scrollStartTimer?.cancel();
     _scrollingTimer?.cancel();
     widget.onChangePlaybackState?.call(false);
-    if (_videoFile != null) {
-      videoPlayerController.setVolume(0.0);
-      videoPlayerController.dispose();
-      widget.onChangePlaybackState?.call(false);
+    if (_videoFile == null) {
+      super.dispose();
+      return;
     }
+    videoPlayerController.setVolume(0.0);
+    if (widget.autoDisposeController) videoPlayerController.dispose();
     super.dispose();
   }
 

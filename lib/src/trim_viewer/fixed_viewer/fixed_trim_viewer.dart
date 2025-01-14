@@ -32,6 +32,11 @@ class FixedTrimViewer extends StatefulWidget {
   /// By default it is set to `true`.
   final bool showDuration;
 
+  /// Determines `VideoPlayerController` disposal strategy
+  ///
+  /// By default it is set to `true`.
+  final bool autoDisposeController;
+
   /// For providing a `TextStyle` to the
   /// duration text.
   ///
@@ -116,6 +121,7 @@ class FixedTrimViewer extends StatefulWidget {
     super.key,
     required this.trimmer,
     required this.onThumbnailLoadingComplete,
+    this.autoDisposeController = true,
     this.viewerWidth = 50.0 * 8,
     this.viewerHeight = 50,
     this.maxVideoLength = const Duration(milliseconds: 0),
@@ -345,7 +351,8 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
       _startCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_startPos.dx + details.delta.dx >= 0) &&
           (_startPos.dx + details.delta.dx <= _endPos.dx) &&
-          !(_endPos.dx - _startPos.dx - details.delta.dx > (maxLengthPixels ?? 0))) {
+          !(_endPos.dx - _startPos.dx - details.delta.dx >
+              (maxLengthPixels ?? 0))) {
         _startPos += details.delta;
         _onStartDragged();
       }
@@ -363,7 +370,8 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
       _endCircleSize = widget.editorProperties.circleSizeOnDrag;
       if ((_endPos.dx + details.delta.dx <= _thumbnailViewerW) &&
           (_endPos.dx + details.delta.dx >= _startPos.dx) &&
-          !(_endPos.dx - _startPos.dx + details.delta.dx > (maxLengthPixels ?? 0))) {
+          !(_endPos.dx - _startPos.dx + details.delta.dx >
+              (maxLengthPixels ?? 0))) {
         _endPos += details.delta;
         _onEndDragged();
       }
@@ -410,11 +418,13 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   void dispose() {
     videoPlayerController.pause();
     widget.onChangePlaybackState?.call(false);
-    if (_videoFile != null) {
-      videoPlayerController.setVolume(0.0);
-      videoPlayerController.dispose();
-      widget.onChangePlaybackState?.call(false);
+    if (_videoFile == null) {
+      super.dispose();
+      return;
     }
+    videoPlayerController.setVolume(0.0);
+    if (widget.autoDisposeController) videoPlayerController.dispose();
+    widget.onChangePlaybackState?.call(false);
     super.dispose();
   }
 

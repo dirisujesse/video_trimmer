@@ -48,6 +48,12 @@ class TrimViewer extends StatefulWidget {
   /// By default it is set to `true`.
   final bool showDuration;
 
+
+  /// Determines `VideoPlayerController` disposal strategy
+  ///
+  /// By default it is set to `true`.
+  final bool autoDisposeController;
+
   /// For providing a `TextStyle` to the
   /// duration text.
   ///
@@ -172,6 +178,7 @@ class TrimViewer extends StatefulWidget {
     required this.trimmer,
     this.maxVideoLength = const Duration(milliseconds: 0),
     this.type = ViewerType.auto,
+    this.autoDisposeController = true,
     this.viewerWidth = 50 * 8,
     this.viewerHeight = 50,
     this.showDuration = true,
@@ -222,6 +229,7 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       maxVideoLength: widget.maxVideoLength,
       viewerWidth: widget.viewerWidth,
       viewerHeight: widget.viewerHeight,
+      autoDisposeController: widget.autoDisposeController,
       showDuration: widget.showDuration,
       durationTextStyle: widget.durationTextStyle,
       durationStyle: widget.durationStyle,
@@ -242,6 +250,7 @@ class _TrimViewerState extends State<TrimViewer> with TickerProviderStateMixin {
       trimmer: widget.trimmer,
       maxVideoLength: widget.maxVideoLength,
       viewerWidth: widget.viewerWidth,
+      autoDisposeController: widget.autoDisposeController,
       viewerHeight: widget.viewerHeight,
       showDuration: widget.showDuration,
       durationTextStyle: widget.durationTextStyle,

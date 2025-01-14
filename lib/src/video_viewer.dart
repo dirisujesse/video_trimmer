@@ -19,6 +19,11 @@ class VideoViewer extends StatefulWidget {
   /// area. By default it is set to `EdgeInsets.all(0.0)`.
   final EdgeInsets padding;
 
+  /// Determines `Trimmer` disposal strategy
+  ///
+  /// By default it is set to `true`.
+  final bool autoDisposeTrimmer;
+
   // ignore: use_key_in_widget_constructors
   /// For showing the video playback area.
   ///
@@ -38,6 +43,7 @@ class VideoViewer extends StatefulWidget {
   const VideoViewer({
     super.key,
     required this.trimmer,
+    this.autoDisposeTrimmer = true,
     this.borderColor = Colors.transparent,
     this.borderWidth = 0.0,
     this.padding = const EdgeInsets.all(0.0),
@@ -96,7 +102,7 @@ class _VideoViewerState extends State<VideoViewer> {
 
   @override
   void dispose() {
-    widget.trimmer.dispose();
+    if (widget.autoDisposeTrimmer) widget.trimmer.dispose();
     super.dispose();
   }
 }
