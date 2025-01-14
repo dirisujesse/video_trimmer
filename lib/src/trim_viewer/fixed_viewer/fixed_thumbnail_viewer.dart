@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:video_trimmer/src/utils/trimmer_utils.dart';
 
-class FixedThumbnailViewer extends StatelessWidget {
+class FixedThumbnailViewer extends StatefulWidget {
   /// The video file from which thumbnails are generated.
   final File videoFile;
 
@@ -52,56 +52,82 @@ class FixedThumbnailViewer extends StatelessWidget {
   });
 
   @override
+  State<StatefulWidget> createState() {
+    return _FixedThumbnailViewerState();
+  }
+}
+
+class _FixedThumbnailViewerState extends State<FixedThumbnailViewer> {
+  late final ValueNotifier<List<Uint8List?>?> thumbnails;
+
+  @override
+  void initState() {
+    super.initState();
+    thumbnails = ValueNotifier(widget.thumbnails);
+    _generateThumbnails();
+  }
+
+  _generateThumbnails() {
+    try {
+      if (thumbnails.value?.isNotEmpty ?? false) return;
+      final stream = generateThumbnail(
+        videoPath: widget.videoFile.path,
+        videoDuration: widget.videoDuration,
+        numberOfThumbnails: widget.numberOfThumbnails,
+        quality: widget.quality,
+        thumbnails: widget.thumbnails,
+        onThumbnailLoadingComplete: widget.onThumbnailLoadingComplete,
+      ).asBroadcastStream();
+      stream.listen((bytes) {
+        thumbnails.value = [...bytes];
+      });
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Uint8List?>>(
-      initialData: thumbnails,
-      stream: generateThumbnail(
-        videoPath: videoFile.path,
-        videoDuration: videoDuration,
-        numberOfThumbnails: numberOfThumbnails,
-        quality: quality,
-        thumbnails: thumbnails,
-        onThumbnailLoadingComplete: onThumbnailLoadingComplete,
+    return ValueListenableBuilder<List<Uint8List?>?>(
+      valueListenable: thumbnails,
+      child: Container(
+        color: Colors.grey[900],
+        height: widget.thumbnailHeight,
+        width: double.maxFinite,
       ),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          List<Uint8List?> imageBytes = snapshot.data!;
-          return Row(
-            mainAxisSize: MainAxisSize.max,
-            children: List.generate(
-              numberOfThumbnails,
-              (index) => SizedBox(
-                height: thumbnailHeight,
-                width: thumbnailHeight,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Opacity(
-                      opacity: 0.2,
-                      child: Image.memory(
-                        imageBytes[0] ?? kTransparentImage,
-                        fit: fit,
-                      ),
+      builder: (context, byteArray, child) {
+        final imageBytes = byteArray ?? [];
+
+        if (imageBytes.isEmpty) {
+          return child!;
+        }
+        return Row(
+          mainAxisSize: MainAxisSize.max,
+          children: List.generate(
+            widget.numberOfThumbnails,
+            (index) => SizedBox(
+              height: widget.thumbnailHeight,
+              width: widget.thumbnailHeight,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Opacity(
+                    opacity: 0.2,
+                    child: Image.memory(
+                      imageBytes[0] ?? kTransparentImage,
+                      fit: widget.fit,
                     ),
-                    index < imageBytes.length
-                        ? FadeInImage(
-                            placeholder: MemoryImage(kTransparentImage),
-                            image: MemoryImage(imageBytes[index]!),
-                            fit: fit,
-                          )
-                        : const SizedBox(),
-                  ],
-                ),
+                  ),
+                  index < imageBytes.length
+                      ? FadeInImage(
+                          placeholder: MemoryImage(kTransparentImage),
+                          image: MemoryImage(imageBytes[index]!),
+                          fit: widget.fit,
+                        )
+                      : const SizedBox(),
+                ],
               ),
             ),
-          );
-        } else {
-          return Container(
-            color: Colors.grey[900],
-            height: thumbnailHeight,
-            width: double.maxFinite,
-          );
-        }
+          ),
+        );
       },
     );
   }
