@@ -193,6 +193,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
 
   @override
   void initState() {
+    log("Fixed Trimmer Initialised");
     super.initState();
     _startCircleSize = widget.editorProperties.circleSize;
     _endCircleSize = widget.editorProperties.circleSize;
@@ -274,7 +275,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
   }
 
   Future<void> _initializeVideoController() async {
-    if (_videoFile != null && mounted) {
+    if (_videoFile != null) {
       videoPlayerController.addListener(() {
         final bool isPlaying = videoPlayerController.value.isPlaying;
 
@@ -424,6 +425,7 @@ class _FixedTrimViewerState extends State<FixedTrimViewer>
 
   @override
   void dispose() {
+    log("Fixed Trimmer Disposed");
     videoPlayerController.pause();
     widget.onChangePlaybackState?.call(false);
     if (_videoFile == null) {
